@@ -18,15 +18,15 @@ def _requires_from_file(filename):
 if __name__ == "__main__":
                 
     setup(
-        name='Attention-PHV',
+        name='Inter6mA',
         version='0.0.1',
-        description="This package called Attention-PHV is used for protein-protein interaction (PPI) prediction",
+        description="This package called Inter6mA is used for prediction of 6mA sites",
         author="Kyushu institute of technology. Kurata laboratory.",
         install_requires = _requires_from_file('requirements.txt'),
         packages = ["."],
         entry_points={
             'console_scripts':[
-                'aphv = main:main',
+                'inter6mA = main:main',
             ]
         },
         classifiers=[
