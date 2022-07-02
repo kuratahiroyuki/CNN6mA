@@ -36,7 +36,7 @@ This package is used for 6mA site prediction
     
 ## 1. Installing the CNN6mA package and pytorch
 CNN6mA is installed by executing the following command in the directory where the package is located.
-`$pip install ./CNN6mA/dist/CNN6mA-0.0.1.tar.tar.gz`
+`$pip install ./CNN6mA/dist/CNN6mA-0.0.1.tar.gz`
 
 ## 2. Training of CNN6mA model for 6mA site prediction
 CNN6mA model for 6mA prediction can be trained by following command.  
@@ -84,7 +84,7 @@ other options)
 |:----:|:----:|:----:|:----:|
 |-i (--import_file)|Path of data file (.csv)|necessary|-|
 |-o (--out_dir)|Directory to output results|necessary|-|
-|-d (--deep_model_file)|Path of a trained attention-phv model|necessary|-|
+|-d (--deep_model_file)|Path of a trained cnn6mA model|necessary|-|
 |-vec (--vec_index)|Flag whether contribution score vectors output|not necessary|False|
 |-thr (--threshold)|Threshold to determined whether interact or not|not necessary|0.5|
 |-batch (--batch_size)|Batch size|not necessary|32|
