@@ -1,8 +1,8 @@
-# Attention-PHV
-This package is used for protein-protein interaction (PPI) prediction
+# CNN6mA
+This package is used for 6mA site prediction
 
 # Features
-・Attention-PHV predicts PPI by amino acid sequences alone.    
+・CNN6mA predicts 6mA site by sequence information.    
 
 # Environment
     Python   : 3.8.0
@@ -11,132 +11,102 @@ This package is used for protein-protein interaction (PPI) prediction
 
 # Processing
  This CLI system is used for three processing as follows.  
- ・Training of a word2vec embedding model to encode amino acid sequences.  
- ・Training of Attention-PHV model for PPI prediction.  
- ・PPI prediction.  
+ ・Training of CNN6mA model for 6mA site prediction.  
+ ・6mA site prediction by the trained model.  
 
 # preparation and installation
 ## 0. Preparation of a virtual environment (not necessary)
-0-1. Creating a virtual environment.  
+0-1. Creating a virtual environment  
     `$conda create -n [virtual environment name] python==3.8.0`
     ex)  
-    `$conda create -n attention_phv_network python==3.8.0`
+    `$conda create -n cnn6mA python==3.8.0`
       
 0-2. Activating the virtual environment  
     `$ conda activate [virtual environment name]`
     ex)  
-    `$ conda activate attention_phv_network`
+    `$ conda activate cnn6mA`
     
-## 1. Installing the Attention-PHV package
-Execute the following command in the directory where the package is located.  
-`$pip install ./Attention-PHV/dist/Attention-PHV-0.0.1.tar.gz`
+0-3. Installing pytorch
+    Pytorch with the version which adjusts your Cuda version need to be installed.  
+    Refer to the following Pytorch sites for the corresponding of Cuda and Pytorch versions.  
+    For example, if you use Cuda with version 11.3, Pytorch is installed by the following.  
+    `$pip install torch==1.11.0+cu113 torchvision==0.12.0+cu113 torchaudio==0.11.0 --extra-index-url https://download.pytorch.org/whl/cu113`
+    If you use cpu, Pytorch is installed by the following.  
+    `$pip install torch`
+    
+## 1. Installing the CNN6mA package and pytorch
+CNN6mA is installed by executing the following command in the directory where the package is located.
+`$pip install ./CNN6mA/dist/CNN6mA-0.0.1.tar.tar.gz`
 
-## 2. Training of a word2vec embedding model to encode amino acid sequences
-A word2vec model can be trained by following command.  
-`$aphv train_w2v -i [Training data file path (fasta format)] -o [output dir path]`
-
-ex)  
-`$aphv train_w2v -i ~/Attention-PHV/sample_data/w2v_sample_data.fa -o ~/Attention-PHV/w2v_model`
-
-other options)
-|option|explanation|necessary or not|default value|
-|:----:|:----:|:----:|:----:|
-|-i (--import_file)|Path of training data (.fasta)|necessary|-|
-|-o (--out_dir)|Directory to save w2v model|necessary|-|
-|-k_mer (--k_mer)|Size of k in k_mer|not necessary|4|
-|-v_s (--vector_size)|Vector size|not necessary|128|
-|-w_s (--window_size)|Window size|not necessary|3|
-|-iter (--iteration)|Iteration of training|not necessary|1000|
-
-(Results)  
-Model files will be output to the specified directory.  
-Filename: AA_model.pt, AA_model.pt.trainables.syn1neg.npy, AA_model.pt.wv.vectors.npy  
-
-|Filename|contents|
-|:----:|:----:|
-|AA_model.pt|word2vec model file|
-|AA_model.pt.trainables.syn1neg.npy|word2vec model file (depending on the model size)|
-|AA_model.pt.wv.vectors.npy|word2vec model file (depending on the model size)|
-
-## 3. Training of Attention-PHV model for PPI prediction
-Attention-PHV model for PPI prediction can be trained by following command (Promote the use of GPU-enabled environments).  
-`$aphv train_deep -t [Training data file path (csv format)] -v [Training data file path (csv format)] -w [word2vec model file path] -o [output dir path]`
+## 2. Training of CNN6mA model for 6mA site prediction
+CNN6mA model for 6mA prediction can be trained by following command.  
+`$cnn6mA train -t [Training data file path (csv format)] -v [Training data file path (csv format)] -o [output dir path]`
 
 ex)  
-`$aphv train_deep -t ~/Attention-PHV/sample_data/train.csv -v ~/Attention-PHV/sample_data/val.csv -w ~/Attention-PHV/w2v_model/AA_model.pt -o ~/Attention-PHV/deep_model`
+`$cnn6mA train -t ./CNN6mA/sample_data/sample_train_data.csv -v ./CNN6mA/sample_data/sample_val_data.csv -o ./CNN6mA/results`
 
-Note that csv files need to contein the following contents (Check the sample data at /Attention-PHV/sample_data)  
-First column (human_id):human protein IDs  
-Second column (human_seq):human protein sequences   
-Third column (virus_id):viral protein IDs 
-Forth column (virus_seq):viral protein sequences  
-Fifth column (labels):label (1: interact, 0: not interact)  
+Note that csv files need to contein the following contents (Check the sample data at /CNN6mA/sample_data)  
+First column (seq):DNE sequence with a length of 41 bp
+Second column (labels):label (1: 6mA, 0: non-6mA)  
 
 other options)
 |option|explanation|necessary or not|default value|
 |:----:|:----:|:----:|:----:|
 |-t (--training_file)|Path of training data file (.csv)|necessary|-|
 |-v (--validation_file)|Path of validation data file (.csv)|necessary|-|
-|-w (--w2v_model_file)|Path of a trained word2vec model|necessary|-|
-|-o (--out_dir)|Directory to output results|necessary|-|
+|-o (--out_dir)|Directory to output the trained model|necessary|-|
 |-t_batch (--training_batch_size)|Training batch size|not necessary|32|
 |-v_batch (--validation_batch_size)|Validation batch size|not necessary|32|
 |-lr (--learning_rate)|Learning rate|not necessary|0.0001|
 |-max_epoch (--max_epoch_num)|Maximum epoch number|not necessary|10000|
 |-stop_epoch (--early_stopping_epoch_num)|Epoch number for early stopping|not necessary|20|
 |-thr (--threshold)|Threshold to determined whether interact or not|not necessary|0.5|
-|-k_mer (--k_mer)|Size of k in k_mer|not necessary|4|
-|-max_len (--max_len)|Maximum sequence length|not necessary|9000|
+|-seq_len (--sequence_length)|Sequence length|not necessary|41|
+|-tp (--target_pos)|Modification site position|not necessary|9000|
+|-device (--device)|Device to be used. If you use cpu, "cpu" must be specified|not necessary|cuda:0|
 
 (Results)  
-Text and model files will be output to the specified directory.  
-Filename: model/deep_model and deep_HV_result.txt
+model files will be output to the specified directory.  
+Filename: deep_model
 |Filename|contents|
 |:----:|:----:|
-|model/deep_model|Attention-PHV model file|
+|deep_model|CNN6mA model file|
 
-## 4. PPI prediction
-PPI prediction is executed by following command (Promote the use of GPU-enabled environments).  
-`$aphv predict -i [data file path (csv format)] -o [output dir path] -w [word2vec model file path] -d [deep learning model file path]`
+## 3.6mA site prediction
+6mA site prediction is executed by following command.  
+`$cnn6mA predict -i [data file path (csv format)] -o [output dir path] -d [deep learning model file path]`
 
 ex)  
-`$aphv predict -i ~/Attention-PHV/sample_data/test.csv -o ~/Attention-PHV/results -w ~/Attention-PHV/w2v_model/AA_model.pt -d ~/Attention-PHV/deep_model/deep_model`
+`$cnn6mA predict -i ./CNN6mA/sample_data/sample_test_data.csv -o ./CNN6mA/results -d ./CNN6mA/data_model/6mA_A.thaliana/deep_model`
 
 other options)
 |option|explanation|necessary or not|default value|
 |:----:|:----:|:----:|:----:|
 |-i (--import_file)|Path of data file (.csv)|necessary|-|
 |-o (--out_dir)|Directory to output results|necessary|-|
-|-w (--w2v_model_file)|Path of a trained word2vec model|necessary|-|
 |-d (--deep_model_file)|Path of a trained attention-phv model|necessary|-|
-|-vec (--vec_index)|Flag whether features output|not necessary|False|
+|-vec (--vec_index)|Flag whether contribution score vectors output|not necessary|False|
 |-thr (--threshold)|Threshold to determined whether interact or not|not necessary|0.5|
 |-batch (--batch_size)|Batch size|not necessary|32|
-|-k_mer (--k_mer)|Size of k in k_mer|not necessary|4|
-|-max_len (--max_len)|Maximum sequence length|not necessary|9000|
+|-seq_len (--sequence_length)|Sequence length|not necessary|41|
+|-tp (--target_pos)|Modification site position|not necessary|9000|
+|-device (--device)|Device to be used. If you use cpu, "cpu" must be specified|not necessary|cuda:0|
 
-Note that csv files need to contein the following contents (Check the sample data at /Attention-PHV/sample_data)  
-First column (human_id):human protein IDs  
-Second column (human_seq):human protein sequences  
-Third column (virus_id):viral protein IDs  
-Forth column (virus_seq):viral protein sequences  
+Note that csv files need to contein the following contents (Check the sample data at /CNN6mA/sample_data)  
+First column (seq):DNE sequence with a length of 41 bp
 
 (Results)  
 CSV files will be output to the specified directory.  
-Filename: probs.csv, after_cnn_human.joblib, after_cnn_virus.joblib, feature_vec_human.joblib, feature_vec_virus.joblib, concatenated_feature_vec.joblib
+Filename: prediction_results.csv, score_vec_list.csv (option)
 
 |Filename|contents|
 |:----:|:----:|
-|probs.csv|Predictive scores|
-|after_cnn_human.joblib|Hidden matrixes generated by network in human|
-|after_cnn_virus.joblib|Hidden matrixes generated by network in virus|
-|feature_vec_human.joblib|Feature vectors generated by network in human|
-|feature_vec_virus.joblib|Feature vectors generated by network in virus|
-|concatenated_feature_vec.joblib|Concatenated feature vectors|
+|prediction_results.csv|Predictive scores|
+|score_vec_list.csv (option)|Contribution score vectors|
 
 #  Other contents
-We provided sample data, word2vec model, and Attention-PHV model as well as CLI system.
-Note that sample data is not the benchmark datasets and this is only present the example.
+We provided sample data and CNN6mA model as well as CLI system.
+Note that sample data is not the benchmark datasets and this is only present as an example.
 
               
 

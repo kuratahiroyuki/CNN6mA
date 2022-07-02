@@ -31,8 +31,9 @@ def save_joblib(filename, data):
     with open(filename, "wb") as f:
         joblib.dump(data, f, compress = 3)
         
-def output_csv(filename, data):
-    data.to_csv(filename, index=False)
+def output_csv(filename, data, index=False):
+    data.to_csv(filename, index = index)
+    
 
 class pv_data_sets(data.Dataset):
     def __init__(self, data_sets, enc_model, device):
@@ -50,12 +51,13 @@ class pv_data_sets(data.Dataset):
         return self.seq[idx], inds.to(self.device).long()
 
 class DeepNet():
-    def __init__(self, out_path, deep_path, enc_dict, model_params, pred_params, encoding_params, vec_ind, device):
+    def __init__(self, out_path, deep_path, enc_dict, model_params, pred_params, encoding_params, vec_ind, target_pos, device):
         self.out_path = out_path
         self.deep_path = deep_path
         self.enc_model = enc_dict
         self.model_params = model_params
         self.vec_ind = vec_ind
+        self.target_pos = target_pos
         
         self.batch_size = pred_params["batch_size"]
         self.thresh = pred_params["thresh"]
@@ -91,17 +93,19 @@ class DeepNet():
         output_csv(self.out_path + "/prediction_results.csv", probs_all)
         
         if(self.vec_ind == True):
-            save_joblib(self.out_path + "/score_vec_list.joblib", score_vec_list)
+            score_vec_list = np.array(score_vec_list)
+            score_vec_list = score_vec_list.reshape([score_vec_list.shape[0], score_vec_list.shape[1]])
+            output_csv(self.out_path + "/score_vec_list.csv", pd.DataFrame(score_vec_list, index = ["sample_{}".format(i + 1) for i in range(score_vec_list.shape[0])], columns = ["position_{}".format(i + 1) if i + 1 < self.target_pos else "position_{}".format(i + 2) for i in range(score_vec_list.shape[1])]), index = True)
 
-def ps_numbering(seq):
-    return [n_list.index(seq[i]) + i * 4 for i in range(len(seq))]
+def numbering(seq):
+    return [n_list.index(seq[i]) for i in range(len(seq))]
 
-def ps_embed_main(seqs, target_pos):
+def embed_main(seqs, target_pos):
     seqs = list(set(seqs))
     embed_dict = {}
     for i in range(len(seqs)):
         seq_temp = seqs[i][0:target_pos - 1] + seqs[i][target_pos:]
-        embed_dict[seqs[i]] = torch.tensor(ps_numbering(seq_temp))
+        embed_dict[seqs[i]] = torch.tensor(numbering(seq_temp))
     return embed_dict
 
 def pred_main(in_path, out_path, deep_model_path, vec_ind = False, thr = 0.5, batch_size = 64, seq_len = 41, target_pos = 21, device = "cuda:0"):
@@ -114,10 +118,10 @@ def pred_main(in_path, out_path, deep_model_path, vec_ind = False, thr = 0.5, ba
     data = file_input_csv(in_path)
     
     print("Encoding sequences", flush = True)
-    mat_dict = ps_embed_main(data["seq"].values.tolist(), target_pos)
+    mat_dict = embed_main(data["seq"].values.tolist(), target_pos)
     
     print("Start prediction", flush = True)
-    net = DeepNet(out_path, deep_model_path, mat_dict, model_params, pred_params, encoding_params, vec_ind, device)
+    net = DeepNet(out_path, deep_model_path, mat_dict, model_params, pred_params, encoding_params, vec_ind, target_pos, device)
     _ = net.prediction(data)
     
     print("Finish processing", flush = True)

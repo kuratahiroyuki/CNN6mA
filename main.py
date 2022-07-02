@@ -58,7 +58,7 @@ def main():
     deep_train_parser.add_argument('-max_epoch', '--max_epoch_num', help = 'Maximum epoch number', default = 10000, type = int)
     deep_train_parser.add_argument('-stop_epoch', '--early_stopping_epoch_num', help = 'Epoch number for early stopping', default = 30, type = int)
     deep_train_parser.add_argument('-thr', '--threshold', help = 'Threshold to determined whether interact or not', default = 0.5, type = float)
-    deep_train_parser.add_argument('-seq_len', '--sequence_length', help = 'Sequence_length', default = 41, type = int)
+    deep_train_parser.add_argument('-seq_len', '--sequence_length', help = 'Sequence length', default = 41, type = int)
     deep_train_parser.add_argument('-tp', '--target_pos', help = 'Modification site position', default = 21, type = int)
     deep_train_parser.add_argument('-device', '--device', help = 'Device to be used', default = "cuda:0")
     deep_train_parser.set_defaults(handler = training_deep_model)

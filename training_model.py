@@ -183,16 +183,17 @@ class DeepNet():
 
         return ""
 
-def ps_numbering(seq):
-    return [n_list.index(seq[i]) + i * 4 for i in range(len(seq))]
+def numbering(seq):
+    return [n_list.index(seq[i]) for i in range(len(seq))]
 
-def ps_embed_main(seqs, target_pos):
+def embed_main(seqs, target_pos):
     seqs = list(set(seqs))
     embed_dict = {}
     for i in range(len(seqs)):
         seq_temp = seqs[i][0:target_pos - 1] + seqs[i][target_pos:]
-        embed_dict[seqs[i]] = torch.tensor(ps_numbering(seq_temp))
+        embed_dict[seqs[i]] = torch.tensor(numbering(seq_temp))
     return embed_dict
+
 
 def training_main(train_path, val_path, out_path, t_batch = 64, v_batch = 64, lr = 0.00001, max_epoch = 10000, stop_epoch = 30, thr = 0.5, seq_len = 41, target_pos = 21, device = "cuda:0"):
     print("Setting parameters", flush = True)
@@ -205,7 +206,7 @@ def training_main(train_path, val_path, out_path, t_batch = 64, v_batch = 64, lr
     validation_data = file_input_csv(val_path)
     
     print("Encoding sequences", flush = True)
-    mat_dict = ps_embed_main(training_data["seq"].values.tolist() + validation_data["seq"].values.tolist(), target_pos)
+    mat_dict = embed_main(training_data["seq"].values.tolist() + validation_data["seq"].values.tolist(), target_pos)
     
     print("Start training a deep neural network model", flush = True)
     net = DeepNet(out_path, mat_dict, model_params, training_params, encoding_params, device)

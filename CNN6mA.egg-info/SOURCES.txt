@@ -1,0 +1,16 @@
+LICENSE
+MANIFEST.in
+README.md
+main.py
+metrics.py
+network.py
+prediction.py
+requirements.txt
+setup.py
+training_model.py
+CNN6mA.egg-info/PKG-INFO
+CNN6mA.egg-info/SOURCES.txt
+CNN6mA.egg-info/dependency_links.txt
+CNN6mA.egg-info/entry_points.txt
+CNN6mA.egg-info/requires.txt
+CNN6mA.egg-info/top_level.txt

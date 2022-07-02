@@ -50,13 +50,13 @@ class PS_denseNet(nn.Module):
 class Deepnet(nn.Module):
     def __init__(self, filter_num = 128, feature = 64, dropout = 0.2, seq_len = 41):
         super(Deepnet, self).__init__()
-        feature_num = 2
+        feature_num = 3
 
-        self.embeddings = nn.Embedding(seq_len * 4, feature)
-
+        self.embeddings = nn.Embedding(4, feature)
 
         self.dense_net_3 = PS_denseNet(window_size = 3, filter_num = filter_num, feature = feature, seq_len = seq_len)
         self.dense_net_5 = PS_denseNet(window_size = 5, filter_num = filter_num, feature = feature, seq_len = seq_len)
+        self.dense_net_7 = PS_denseNet(window_size = 7, filter_num = filter_num, feature = feature, seq_len = seq_len)
         
         self.HiddenDense = nn.Linear(filter_num * feature_num, filter_num * 2)
 
@@ -76,10 +76,12 @@ class Deepnet(nn.Module):
 
         hd_3 = self.dense_net_3(h_d)
         hd_5 = self.dense_net_5(h_d)
+        hd_7 = self.dense_net_7(h_d)
 
-        h_d = torch.cat((hd_3, hd_5), axis = 2)
+        h_d = torch.cat((hd_3, hd_5, hd_7), axis = 2)
 
         h_d = h_d.unsqueeze(2).expand(-1, -1, h_d.size(1), -1) + h_d.unsqueeze(1).expand(-1, h_d.size(1), -1, -1)
+        
         h_d = self.HiddenDense(h_d)
         h_d, _ = torch.max(h_d, dim = 1)
 
@@ -90,17 +92,26 @@ class Deepnet(nn.Module):
         return score
     
         
+
 """
-a = torch.randn(32, 41, 64).float()
-b = torch.randn(32, 41, 64).float()
+a = torch.randn(32, 41, 4).float()
+#b = torch.randn(32, 41, 4).float()
 
-model = Deepnet(feature = 64, seq_len = 41)
-temp = model(a)
+net = Deepnet(feature = 4, seq_len = 41)
+temp_1, temp_2 = net(a)
 
-print(model.state_dict())
+temp_1 = temp_1.detach().clone().numpy()
+temp_2 = temp_2.detach().clone().numpy()
+
+#print(model.state_dict())
 #temp = temp.detach().clone().numpy()
+
+params = 0
+for p in net.parameters():
+    if p.requires_grad:
+        params += p.numel()
+        
+print(params)
 """
-
-
 
     

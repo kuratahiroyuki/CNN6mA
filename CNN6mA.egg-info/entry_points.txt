@@ -1,0 +1,2 @@
+[console_scripts]
+cnn6mA = main:main
